@@ -1,0 +1,53 @@
+########################################
+# Don't track content of these folders #
+########################################
+build/
+doc/
+classes/
+class/
+jar/
+data/
+temp/
+
+####################
+# Compressed Files #
+####################
+*.zip
+*.7z
+*.gz
+*.tar
+*.rar
+
+###################
+# Compiled source #
+###################
+*.class
+*.jar
+
+#############
+# Log Files #
+#############
+*.log
+target.txt
+
+#########################
+# System Specific Files #
+#########################
+#######
+# Mac #
+#######
+._whatever
+.DS_Store
+.Trashes/
+.hidden
+.vol
+
+###########
+# Windows #
+###########
+boot.ini
+
+#########
+# Other #
+#########
+.vscode
