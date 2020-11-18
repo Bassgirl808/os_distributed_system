@@ -1,0 +1,163 @@
+<!-- - - - - - - - - - - - - - - - - - - - - - -  ->
+<-    _________     _________     ____________    ->
+<-   /  _____  \   /         \   /            \   ->
+<-   | /     \ |   |         |   |    ____    |   ->
+<-   | |     | |   \_________    \___\    |   |   ->
+<-   | |     | |             \           /   |    ->
+<-   | |     | |             |     ___   \   \    ->
+<-   | \_____/ |   |         |   /   \___/    |   ->
+<-   \_________/   \_________/   \___________/    ->
+<- - - - - - - - - - - - - - - - - - - - - - - - -->
+
+<!-- OS Distributed System Project 3 build file  -->
+<project name="osdistributedsystem" basedir="." default="main">
+    <!-- - - - - - - - - - - - - - - - - - - - - ->
+    <-                                           ->
+    <-                                           ->
+    <-          Variables for Ant Buildfile      ->
+    <-                                           ->
+    <-                                           ->
+    <- - - - - - - - - - - - - - - - - - - - -  -->
+    <!-- Source Code Directory -->
+    <property name="src.dir" value="src" />
+    <!-- Build Directory-->
+    <property name="build.dir" value="build" />
+    <!-- Class Directory -->
+    <property name="class.dir" value="class" />
+    <!-- Jar Directory -->
+    <property name= "jar.dir" value="jar" />
+    <!-- Javadoc Directory -->
+    <property name="javadoc.dir" value="javadoc" />
+    <!-- Main Class Name -->
+    <property name="main.class" value="${ant.project.name}.Main" />
+    <!-- Program Data Directory -->
+    <property name="data.dir" value="data" />
+
+
+
+
+
+    <!-- - - - - - - - - - - - - - - - - - - - - ->
+    <-                                           ->
+    <-          Targets for Ant Buildfile        ->
+    <-                                           ->
+    <- - - - - - - - - - - - - - - - - - - - -  -->
+    <!-- - - - - - - - - - - - - - - - - - - - - ->
+    <-                   Clean                   ->
+    <- - - - - - - - - - - - - - - - - - - - -  -->
+    <!-- Remove build files -->
+    <target name="clean_build">
+        <delete dir="${build.dir}" />
+    </target>
+
+    <!-- Remove class files -->
+    <target name="clean_class">
+        <delete dir="${class.dir}" />
+    </target>
+
+    <!-- Remove jar files -->
+    <target name="clean_jar">
+        <delete dir="${jar.dir}" />
+    </target>
+
+    <!-- Remove program generated files -->
+    <target name="clean_data">
+        <delete dir="${data.dir}" />
+    </target>
+    
+    <!-- Remove all generated files -->
+    <target name="clean" depends="clean_build, clean_class, clean_jar, clean_data" />
+
+
+
+    <!-- - - - - - - - - - - - - - - - - - - - - ->
+    <-                   Build                   ->
+    <- - - - - - - - - - - - - - - - - - - - -  -->
+    <!-- Initialize Directory Structure -->
+    <target name="initialize">
+        <mkdir dir="${class.dir}" />
+    </target>
+
+    <!-- Compile Application -->
+    <target name="compile">
+        <javac srcdir="${src.dir}" destdir="${class.dir}" />
+    </target>
+    
+    <!-- Create Executeable Jar -->
+    <target name="jar">
+        <mkdir dir="${jar.dir}" />
+        <jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${class.dir}">
+            <manifest>
+                <attribute name="Main-Class" value="${main.class}" />
+            </manifest>
+        </jar>
+    </target>
+
+
+
+    <!-- - - - - - - - - - - - - - - - - - - - - ->
+    <-                  Javadoc                  ->
+    <- - - - - - - - - - - - - - - - - - - - -  -->
+    <target name="javadoc">
+        <javadoc destdir="${javadoc.dir}">
+            <fileset dir="${src.dir}" />
+        </javadoc>
+    </target>
+
+
+
+    <!-- - - - - - - - - - - - - - - - - - - - - ->
+    <-                    Run                    ->
+    <- - - - - - - - - - - - - - - - - - - - -  -->
+    <target name="run">
+        <java jar="${jar.dir}/${ant.project.name}.jar" fork="true" />
+    </target>
+
+
+
+
+
+    <!-- - - - - - - - - - - - - - - - - - - - - ->
+    <-                                           ->
+    <-                                           ->
+    <-                  Aliases                  ->
+    <-                                           ->
+    <-                                           ->
+    <- - - - - - - - - - - - - - - - - - - - -  -->
+    <!-- Clean -->
+    <target name="c" depends="clean" />
+    <!-- Initialize -->
+    <target name="init" depends="initialize" />
+    <target name="i" depends="initialize" />
+    <!-- Javadoc -->
+    <target name="doc" depends="javadoc" />
+    <target name="d" depends="javadoc" />
+    <!-- Compile -->
+    <target name="build" depends="initialize, compile"/>
+    <target name="b" depends="initialize, compile"/>
+    <!-- Build and Jar -->
+    <target name="bj" depends="initialize, compile, jar" />
+    <!-- Clean and Compile -->
+    <target name="cb" depends="clean, initialize, compile" />
+    <target name="cbj" depends="clean, initialize, compile, jar" />
+    <!-- Clean Build Jar Run -->
+    <target name="cbjr" depends="clean, initialize, compile, jar, run" />
+    <!-- Compile Jar -->
+    <target name="j" depends="initialize, compile, jar" />
+    <!-- Run -->
+    <target name="r" depends="run" />
+    
+    
+
+    
+
+    <!-- - - - - - - - - - - - - - - - - - - - - ->
+    <-                                           ->
+    <-                                           ->
+    <-               Primary Target              ->
+    <-                                           ->
+    <-                                           ->
+    <- - - - - - - - - - - - - - - - - - - - -  -->
+    <!-- Main Task -->
+    <target name="main" depends="clean, initialize, compile, jar, run" />
+</project>
