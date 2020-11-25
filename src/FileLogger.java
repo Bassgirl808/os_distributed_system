@@ -46,6 +46,30 @@ public class FileLogger {
 	}
 
 	//Used for writing data from the simulation controller
+	public static void writeServer(String message) {
+		try {
+			//Set absolute file location for writing to (logfile including directory relative to ant buildfile working directory set in the jar)
+			String absoluteFileUri = Constants.DIRECTORY_CONTROLLER + Constants.FILE_LOG_BACKGROUND;
+
+			//RandomAccessFile used to write to files maintaining synchronicity on device storage in the case of multiple pieces writing to same file
+			RandomAccessFile randomAccessFile = new RandomAccessFile(absoluteFileUri, "rwd");
+			
+			//Advance cursor to EOF
+			randomAccessFile.seek(randomAccessFile.length());
+
+			//Create message
+			String msg = createTimeStamp() + "\t" + message + "\n";
+
+			//Write message to end of file and console
+			randomAccessFile.writeBytes(msg);
+			System.out.println(msg);
+
+			//Prevent Memory Leaks
+			randomAccessFile.close();
+		} catch (IOException iex) {}
+	}
+
+	//Used for writing data from the simulation controller
 	public static void writeController(VectorClock clock, String message) {
 		try {
 			//VectorClock should be valid unless there is an error in serialization and transmission of clock
@@ -65,7 +89,7 @@ public class FileLogger {
 			randomAccessFile.seek(randomAccessFile.length());
 
 			//Create message
-			String msg = createTimeStamp() + "\t" + clock + "\t" + message + "\n";
+			String msg = createTimeStamp() + "\t" + message + "\t" + clock.toString() + "\n";
 
 			//Write message to end of file and console
 			randomAccessFile.writeBytes(msg);
