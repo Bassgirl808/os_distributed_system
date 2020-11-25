@@ -5,6 +5,7 @@ public interface Constants {
     //Number of clients
     public static final int NUMBER_OF_CLIENTS = 5;
 
+    public static final String IPV4 = "127.0.0.1";
     public static final int PORT = 8020;
     
     public static final int READ_VALUE = 80;
