@@ -27,4 +27,11 @@ public interface Constants {
         Constants.DIRECTORY_LOG + "PC4/",
         Constants.DIRECTORY_LOG + "PC5/"
     };  
+
+    public static enum COMMANDS {
+        REQUEST_READ,
+        REQUEST_WRITE,
+        REPLY_READ,
+        REPLY_WRITE
+    }
 }
