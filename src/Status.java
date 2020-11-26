@@ -1,6 +1,6 @@
 package osdistributedsystem;
 
-public enum Status {
+public static enum Status {
     IDLE,
     READING,
     WRITING
