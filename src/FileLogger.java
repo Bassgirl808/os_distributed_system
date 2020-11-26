@@ -25,7 +25,7 @@ public class FileLogger {
 			}
 
 			//Set absolute file location for writing to (logfile including directory relative to ant buildfile working directory set in the jar)
-			String absoluteFileUri = "./" + Constants.DIRECTORY_LOG + Constants.DIRECTORY_PC[clock.getId()] + "/" + Constants.FILE_LOG_GLOBAL;
+			String absoluteFileUri = "./" + Constants.DIRECTORY_LOG + Constants.DIRECTORY_PC[clock.getId() - 1] + "/" + Constants.FILE_LOG_LOCAL;
 
 			//RandomAccessFile used to write to files maintaining synchronicity on device storage in the case of multiple pieces writing to same file
 			RandomAccessFile randomAccessFile = new RandomAccessFile(absoluteFileUri, "rw");
@@ -45,7 +45,31 @@ public class FileLogger {
 		} catch (IOException iex) {}
 	}
 
-	//Used for writing data from the simulation controller
+	//Used for writing client data (non simulation)
+	public static void writeClient(int id, String message) {
+		try {
+			//Set absolute file location for writing to (logfile including directory relative to ant buildfile working directory set in the jar)
+			String absoluteFileUri = "./" + Constants.DIRECTORY_LOG + Constants.DIRECTORY_PC[id - 1] + "/" + Constants.FILE_LOG_BACKGROUND;
+
+			//RandomAccessFile used to write to files maintaining synchronicity on device storage in the case of multiple pieces writing to same file
+			RandomAccessFile randomAccessFile = new RandomAccessFile(absoluteFileUri, "rw");
+			
+			//Advance cursor to EOF
+			randomAccessFile.seek(randomAccessFile.length());
+
+			//Create message
+			String msg = "[PC" + id + "]\t" + message + "\n";
+
+			//Write message to end of file and console
+			randomAccessFile.writeBytes(msg);
+			System.out.println(msg);
+
+			//Prevent Memory Leaks
+			randomAccessFile.close();
+		} catch (IOException iex) {}
+	}
+
+	//Used for writing data from the simulation controller (server/ServerThreads)
 	public static void writeServer(String message) {
 		try {
 			//Set absolute file location for writing to (logfile including directory relative to ant buildfile working directory set in the jar)
