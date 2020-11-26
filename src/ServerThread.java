@@ -9,8 +9,12 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import java.util.concurrent.Semaphore;
+
 public class ServerThread implements Runnable {
     private Socket socket = null;
+
+    private Semaphore lock;
 
     private ObjectInputStream objectInput = null;
     private ObjectOutputStream objectOutput = null;
@@ -19,6 +23,7 @@ public class ServerThread implements Runnable {
     
     public ServerThread(Socket socket, ObjectInputStream objectInput, ObjectOutputStream objectOutput, int id) {
         this.socket = socket;
+        lock = new Semaphore(1);
         this.objectInput = objectInput;
         this.objectOutput = objectOutput;
         this.id = id;
