@@ -1,6 +1,6 @@
 package osdistributedsystem;
 
-public static enum Command {
+public enum Command {
     REQUEST_READ,
     REQUEST_WRITE,
     REPLY_READ,
