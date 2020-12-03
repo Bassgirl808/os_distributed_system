@@ -141,7 +141,7 @@ public class FileLogger {
 
 			//Write message to end of file and console
 			randomAccessFile.writeBytes(msg);
-			System.out.println(msg);
+			//System.out.println(msg);
 
 			//Prevent Memory Leaks
 			randomAccessFile.close();
