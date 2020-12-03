@@ -27,4 +27,9 @@ public interface Constants {
         Constants.DIRECTORY_LOG + "PC4/",
         Constants.DIRECTORY_LOG + "PC5/"
     };
+
+    //Thread names
+    public static final String THREAD_NAME_SERVER = "Server";
+    public static final String THREAD_NAME_SERVERTHREAD = "ServerThread";
+    public static final String THREAD_NAME_CLIENT = "Client";
 }
