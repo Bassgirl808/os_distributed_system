@@ -49,6 +49,7 @@ public class Server implements Runnable {
                     ServerThread serverThread = new ServerThread(id, this.serverThreads, this.client);
                     this.serverThreads.put(id, serverThread);
                     Thread thread = new Thread(serverThread);
+                    ShutdownHandler.ServerThreads.add(thread);
                     FileLogger.writeServer("[INFO]:[Server#run]::ServerThread created");
 
                     FileLogger.writeServer("[INFO]:[Server#run]::Start ServerThread");

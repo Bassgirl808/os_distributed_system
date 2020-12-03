@@ -40,6 +40,10 @@ public class Client implements Runnable {
         FileLogger.writeClient(this.id, "[INFO]:[Client#Client]::Client for PC" + this.id + "is set up");
     }
 
+    public int getId() {
+        return this.clock.getId();
+    }
+
     public void run() {
         FileLogger.writeClient(this.id, "[INFO]:[Client#run]::Starting Client");
         try {
