@@ -9,6 +9,15 @@ jar/
 data/
 temp/
 
+###########################
+# Don't track these files #
+###########################
+*.test
+*.tmp
+*.temp
+*.trash
+*.garbage
+
 ####################
 # Compressed Files #
 ####################
