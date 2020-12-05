@@ -32,6 +32,6 @@ public interface Constants {
     public static final String THREAD_NAME_SERVER = "Server";
     public static final String THREAD_NAME_SERVERTHREAD = "ServerThread";
     public static final String THREAD_NAME_CLIENT = "Client";
-    public static final String THREAD_NAME_INSTRUCTOR = "Instructors";
-    public static final String THREAD_NAME_OPERATOR = "Operators";
+    public static final String THREAD_NAME_INSTRUCTOR = "Instructor";
+    public static final String THREAD_NAME_OPERATOR = "Operator";
 }
