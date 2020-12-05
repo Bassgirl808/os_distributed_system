@@ -18,6 +18,8 @@ public class ShutdownHandler {
     protected static volatile Thread MainThread = new Thread();
     protected static volatile Thread Server = new Thread();
     protected static volatile List<Thread> Clients = new LinkedList<Thread>();
+    protected static volatile List<Thread> Instructors = new LinkedList<Thread>();
+    protected static volatile List<Thread> Operators = new LinkedList<Thread>();
     protected static volatile List<Thread> ServerThreads = new LinkedList<Thread>();
 
     protected static void prepareShutdownHandling(Thread mainThread) throws IllegalArgumentException {
@@ -28,7 +30,7 @@ public class ShutdownHandler {
             public void run() {
                 FileLogger.writeBackground("[INFO]:[ShutdownHandler#run]::Shutting down gracefully, press <CTRL-C> again to force quit");
                 //Join all threads
-                List<Thread> threads = Stream.concat(ShutdownHandler.Clients.stream(), ShutdownHandler.ServerThreads.stream()).collect(Collectors.toList());
+                List<Thread> threads = Stream.concat(ShutdownHandler.Clients.stream(), ShutdownHandler.Instructors.stream(), ShutdownHandlers.Operators.stream(), ShutdownHandler.ServerThreads.stream()).collect(Collectors.toList());
                 FileLogger.writeBackground("[INFO]:[ShutdownHandler#run]::Stopping all threads - " + (threads.size() + 1) + " total.");
                 
                 //Shut down all client and serverthread threads
@@ -41,6 +43,28 @@ public class ShutdownHandler {
                             FileLogger.writeBackground("[INFO]:[ShutdownHandler#run]::Client thread stopped");
                         } catch (InterruptedException iex) {
                             FileLogger.writeBackground("[ERROR]:[ShutdownHandler#run]::Error Stopping client thread: " + thread.getId());
+                            System.err.println(iex.getMessage());
+                            System.exit(2);
+                        }
+                    } else if (thread.getName().equals(Constants.THREAD_NAME_OPERATOR)) {
+                        FileLogger.writeBackground("[INFO]:[ShutdownHandler#run]::Stopping Operator thread ID");
+                        try {
+                            FileLogger.writeBackground("[INFO]:[ShutdownHandler#run]::Stopping Operator: " +  thread.getId());
+                            thread.join();
+                            FileLogger.writeBackground("[INFO]:[ShutdownHandler#run]::Operator thread stopped");
+                        } catch (InterruptedException iex) {
+                            FileLogger.writeBackground("[ERROR]:[ShutdownHandler#run]::Error Stopping Operator thread: " + thread.getId());
+                            System.err.println(iex.getMessage());
+                            System.exit(2);
+                        }
+                    } else if (thread.getName().equals(Constants.THREAD_NAME_INSTRUCTOR)) {
+                        FileLogger.writeBackground("[INFO]:[ShutdownHandler#run]::Stopping Instructor thread ID");
+                        try {
+                            FileLogger.writeBackground("[INFO]:[ShutdownHandler#run]::Stopping Instructor: " +  thread.getId());
+                            thread.join();
+                            FileLogger.writeBackground("[INFO]:[ShutdownHandler#run]::Instructor thread stopped");
+                        } catch (InterruptedException iex) {
+                            FileLogger.writeBackground("[ERROR]:[ShutdownHandler#run]::Error Stopping Instructor thread: " + thread.getId());
                             System.err.println(iex.getMessage());
                             System.exit(2);
                         }
