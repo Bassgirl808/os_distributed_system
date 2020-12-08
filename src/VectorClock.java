@@ -45,8 +45,8 @@ public class VectorClock implements Serializable, Comparable<VectorClock> {
 		this.setTime(this.id - 1, this.getTime(this.id - 1) + 1);
 	}
 
-	//update timeStamp comparing to otherVectorClock
-	public void update(VectorClock otherVectorClock) {
+	//Update timeStamp of this class by comparing to otherVectorClock and merging values
+	public void merge(VectorClock otherVectorClock) {
 		for (int i = 0; i < Constants.NUMBER_OF_CLIENTS; i++) this.setTime(i, Math.max(this.getTime(i), otherVectorClock.getTime(i)));
 	}
 
