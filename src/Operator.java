@@ -113,11 +113,13 @@ public class Operator implements Runnable {
                     }
                     case REPLY_WRITE: {
                         //Begin critical writing section - non concurrent - serial
-                        writeLock.acquire();
+                        this.writeLock.acquire();
 
                         this.event++;
 
-                        if (this.event >= Constants.NUMBER_OF_CLIENTS) {
+                        if (this.event >= Constants.NUMBER_OF_CLIENTS - 1) {
+                            this.readLock.acquire(Constants.NUMBER_OF_CLIENTS);
+                            
                             this.clock.increment();
                             FileIO.download(this.clock.getId() - 1);
 
@@ -138,9 +140,9 @@ public class Operator implements Runnable {
 
                             this.event = 0;
                             this.status = Status.IDLE;
+                            this.readLock.release(Constants.NUMBER_OF_CLIENTS);
                         }
-
-                        writeLock.release();
+                        this.writeLock.release();
                         //End critical writing section - non concurrent -serial
                         break;
                     }
