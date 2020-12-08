@@ -9,9 +9,9 @@ public interface Constants {
     public static final int PORT = 8020;
     
     //Percentage of actions client should take
-    public static final int PERCENT_IDLE = 10;
-    public static final int PERCENT_READ = 70;
-    public static final int PERCENT_WRITE = 20;
+    public static final double PERCENT_IDLE = 0.10;
+    public static final double PERCENT_READ = 0.70;
+    public static final double PERCENT_WRITE = 0.20;
     
     //Log File Names
     public static final String FILE_LOG_GLOBAL = "global.log";
@@ -38,4 +38,9 @@ public interface Constants {
     public static final String THREAD_NAME_CLIENT = "Client";
     public static final String THREAD_NAME_INSTRUCTOR = "Instructor";
     public static final String THREAD_NAME_OPERATOR = "Operator";
+
+    public static final long DELAY_ACTION = 250;
+    public static final long DELAY_NETWORK = 400;
+    public static final long DELAY_CLIENT_READ = 4000;
+    public static final long DELAY_CLIENT_WRITE = 1500;
 }
