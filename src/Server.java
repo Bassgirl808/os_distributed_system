@@ -64,11 +64,13 @@ public class Server implements Runnable {
                     System.err.println(ioex.getMessage());
                 }
             }
+
+            //Busy wait until completion of program
+            while (!Thread.currentThread().interrupted());
         } catch (IOException ioex) {
             FileLogger.writeServer("[ERROR]:[Server#run]::Server Failure: " + ioex.getMessage());
             System.err.println(ioex.getMessage());
             System.exit(1);
         }
-    }    
+    }
 }
-
