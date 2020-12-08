@@ -26,7 +26,7 @@ public class FileIO {
 	//Copy makes a local copy in your folder of the target file for reading
 	public static void copy(int id) throws IOException {
 		//Destination is where the copy will be saved
-		File destination = new File(Constants.DIRECTORY_PC[id] + Constants.FILE_COPY);
+		File destination = new File(Constants.DIRECTORY_PC[id] + Constants.FILE_TARGET_COPY);
 		//Copy target to location based on relative URI and replace inlocation if already existing
 		Files.copy(FileIO.target.toPath(), destination.toPath(), StandardCopyOption.REPLACE_EXISTING);
 	}
@@ -34,7 +34,7 @@ public class FileIO {
 	//Delete local copy in your folder of the target file for reading
 	public static void deleteCopy(int id) throws IOException {
 		//Local copy to delete
-		File file = new File(Constants.DIRECTORY_PC[id] + Constants.FILE_COPY);
+		File file = new File(Constants.DIRECTORY_PC[id] + Constants.FILE_TARGET_COPY);
 		//File be gone!
 		file.delete();
 	}
