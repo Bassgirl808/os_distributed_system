@@ -17,7 +17,8 @@ public interface Constants {
     public static final String FILE_LOG_GLOBAL = "global.log";
     public static final String FILE_LOG_LOCAL = "local.log";
     public static final String FILE_TARGET = "target.txt";
-    public static final String FILE_COPY = "target_copy.txt";
+    public static final String FILE_TARGET_COPY = "target_copy.txt";
+    public static final String FILE_TARGET_WRITE = "target_write.txt";
     public static final String FILE_LOG_BACKGROUND = "background.log";
 
     //Directories
