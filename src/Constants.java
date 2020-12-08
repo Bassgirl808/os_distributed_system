@@ -8,13 +8,16 @@ public interface Constants {
     public static final String IPV4 = "127.0.0.1";
     public static final int PORT = 8020;
     
-    public static final int READ_VALUE = 80;
-    public static final int WRITE_VALUE = 20;
+    //Percentage of actions client should take
+    public static final int PERCENT_IDLE = 10;
+    public static final int PERCENT_READ = 70;
+    public static final int PERCENT_WRITE = 20;
     
     //Log File Names
     public static final String FILE_LOG_GLOBAL = "global.log";
     public static final String FILE_LOG_LOCAL = "local.log";
     public static final String FILE_TARGET = "target.txt";
+    public static final String FILE_COPY = "target_copy.txt";
     public static final String FILE_LOG_BACKGROUND = "background.log";
 
     //Directories
