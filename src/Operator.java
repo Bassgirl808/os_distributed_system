@@ -167,6 +167,7 @@ public class Operator implements Runnable {
                         //Begin critical writing section - non concurrent - serial
                         FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Beginning critical writing section");
                         FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Acquiring license to write");
+                        //FileIO.writeLock.acquire();
                         this.writeLock.acquire();
                         FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Writing license acquired");
 
@@ -190,6 +191,7 @@ public class Operator implements Runnable {
                             this.clock.increment();
                             FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Begin writing to file");
                             FileIO.write(this.clock);
+                            FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Complete writing to file");
 
                             //Simulate delay for client writing
                             Thread.sleep(Constants.DELAY_CLIENT_WRITE);
@@ -212,6 +214,7 @@ public class Operator implements Runnable {
                         }
                         FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Returning license to write");
                         this.writeLock.release();
+                        //FileIO.writeLock.release();
                         FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::License to write returned");
                         FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Ending critical writing section");
                         //End critical writing section - non concurrent -serial

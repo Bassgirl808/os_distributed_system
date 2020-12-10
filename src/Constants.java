@@ -9,8 +9,8 @@ public interface Constants {
     public static final int PORT = 10000;
     
     //Percentage of actions client should take
-    public static final double PERCENT_IDLE = 0.02;
-    public static final double PERCENT_READ = 0.85;
+    public static final double PERCENT_IDLE = 0.03;
+    public static final double PERCENT_READ = 0.84;
     public static final double PERCENT_WRITE = 0.13;
 
     //Concurrent IO
