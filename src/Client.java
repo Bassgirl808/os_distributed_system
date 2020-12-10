@@ -41,17 +41,22 @@ public class Client implements Runnable {
             this.clock = (VectorClock)this.input.readObject();
             FileLogger.writeBackground("[INFO]:[Client#Client]::VectorClock received: " + this.clock);
 
+            FileLogger.writeBackground("[INFO]:[Client#Client]::Setting up locks for streams");
             this.inputLock = new Semaphore(1);
             this.outputLock = new Semaphore(1);
+            FileLogger.writeBackground("[INFO]:[Client#Client]::Locks for streams set up");
         } catch (ClassNotFoundException cnfex) {
             FileLogger.writeBackground("[ERROR]:[Client#Client]::Class Not Found: " + cnfex.getMessage());
             System.err.println(cnfex.getMessage());
+            System.exit(1)
         } catch (UnknownHostException uhex) {
             FileLogger.writeBackground("[ERROR]:[Client#Client]::Unknown Host: " + uhex.getMessage());
             System.err.println(uhex.getMessage());
+            System.exit(1)
         } catch (IOException ioex) {
             FileLogger.writeBackground("[ERROR]:[Client#Client]::Server Failure: " + ioex.getMessage());
             System.err.println(ioex.getMessage());
+            System.exit(1)
         }
         FileLogger.writeBackground("[INFO]:[Client#Client]::Client for PC" + this.getId() + " is set up");
     }
@@ -63,10 +68,12 @@ public class Client implements Runnable {
     public void run() {
         FileLogger.writeClient(this.getId(), "[INFO]:[Client#run]::Starting Client");
 
-        FileLogger.writeClient(this.getId(), "[INFO]:[Client#run]::Waiting for start command");
         try {
+            FileLogger.writeClient(this.getId(), "[INFO]:[Client#run]::Wait for start command");
             if (Command.values()[this.input.readInt()] != Command.START) System.exit(5);
+            FileLogger.writeClient(this.getId(), "[INFO]:[Client#run]::Start command received");
         } catch (IOException ioex) {
+            FileLogger.writeClient(this.getId(), "[ERROR]:[Client#run]::IO Failure: " + ioex.getMessage());
             System.err.println(ioex.getMessage());
             System.exit(4);
         }

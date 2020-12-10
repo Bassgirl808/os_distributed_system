@@ -100,9 +100,11 @@ public class Instructor implements Runnable {
         } catch (InterruptedException iex){
             FileLogger.writeSimulation(this.clock, "[ERROR]:[Instructor#run]::Interrupted Exception: " + iex.getMessage());
             System.err.println(iex.getMessage());
+            System.exit(1);
         }catch (IOException ioex){
             FileLogger.writeSimulation(this.clock, "[ERROR]:[Instructor#run]::IO Exception: " + ioex.getMessage());
             System.err.println(ioex.getMessage());
+            System.exit(1);
         }
     }
 

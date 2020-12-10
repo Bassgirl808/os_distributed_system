@@ -47,7 +47,9 @@ public class Operator implements Runnable {
     public void run() {
         try {
             while (!Thread.currentThread().interrupted()) {
+                FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Acquiring license for input stream");
                 this.inputLock.acquire();
+                FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::License for input stream acquired");
                 Command command = Command.values()[input.readInt()];
                 VectorClock otherClock = (VectorClock)input.readObject();
                 this.inputLock.release();
@@ -57,20 +59,24 @@ public class Operator implements Runnable {
                 //Handle requests and replies
                 switch (command) {
                     case REQUEST_READ:
+                        FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Acquiring license for output stream");
                         this.outputLock.acquire();
+                        FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::License to output stream acquired");
                         this.output.writeInt(Command.REPLY_READ.ordinal());
                         this.output.writeObject(this.clock);
                         this.output.writeInt(otherClock.getId());
 
                         this.output.flush();
                         this.output.reset();
+                        FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Returning license for output stream");
                         this.outputLock.release();
+                        FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::License for output stream returned");
                         break;
                     case REPLY_READ:
                         //Begin critical reading section - parallelism allowed
-                        FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Acquiring access to read");
+                        FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Acquiring license to read");
                         this.readLock.acquire();
-                        FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Reading access acquired");
+                        FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Reading license acquired");
 
                         this.clock.increment();
 
@@ -91,8 +97,9 @@ public class Operator implements Runnable {
 
                         this.status = Status.IDLE;
 
-                        FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Return access for reading");
+                        FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Returning license for reading");
                         this.readLock.release();
+                        FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::License for reading returned");
                         //End critical reading section - parallelism allowed
                         break;
                     case REQUEST_WRITE: {
@@ -101,47 +108,54 @@ public class Operator implements Runnable {
 
                             //this->other or (this||other and this smaller id than other) - either our clock is not as new as theirs or arbitrary if parallel
                             if (comparison == -1 || (comparison == 0 && this.clock.getId() < otherClock.getId())) {
-                                FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Clock out of date");
+                                FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Selecting other clock as future event");
                                 this.queue.add(otherClock);
-                                FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Updating clock");
+                                FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Added other clock to queue for event processing");
                                 this.busy = true;
                             //other->this or (this||other and this larger id than other) - either our clock is newer than theirs or arbitrary if parallel
                             } else if (comparison == 1 || (comparison == 0 && this.clock.getId() > otherClock.getId())) {
-                                FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Clock up to date");
+                                FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Selecting this clock as future event");
 
                                 this.clock.increment();
 
-                                FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Writing access granted");
+                                FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Acquiring license for output stream");
                                 this.outputLock.acquire();
+                                FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]:License for output stream acquired");
                                 this.output.writeInt(Command.REPLY_WRITE.ordinal());
                                 this.output.writeObject(this.clock);
                                 this.output.writeInt(otherClock.getId());
                                 
                                 this.output.flush();
                                 this.output.reset();
+                                FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Returning license for output stream");
                                 this.outputLock.release();
+                                FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::License for output stream returned");
                             } 
                         } else {
                             FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::No client writing");
                             this.clock.increment();
 
-                            FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Writing access granted");
+                            FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Acquiring license for output stream");
                             this.outputLock.acquire();
+                            FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::License for output stream acquired");
                             this.output.writeInt(Command.REPLY_WRITE.ordinal());
                             this.output.writeObject(this.clock);
                             this.output.writeInt(this.clock.getId());
                             
                             this.output.flush();
                             this.output.reset();
+                            FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Returning license for output stream");
                             this.outputLock.release();
+                            FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::License for output stream returned");
                         }
                         break;
                     }
                     case REPLY_WRITE: {
                         //Begin critical writing section - non concurrent - serial
-                        FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Acquiring access to write");
+                        FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Beginning critical writing section");
+                        FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Acquiring license to write");
                         this.writeLock.acquire();
-                        FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Writing access acquired");
+                        FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Writing license acquired");
 
                         this.event++;
 
@@ -183,7 +197,10 @@ public class Operator implements Runnable {
                             //this.readLock.release(Constants.NUMBER_OF_CLIENTS);
                             //FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::All licenses for reading returned");
                         }
+                        FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Returning license to write");
                         this.writeLock.release();
+                        FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::License to write returned");
+                        FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Ending critical writing section");
                         //End critical writing section - non concurrent -serial
                         break;
                     }
@@ -194,24 +211,34 @@ public class Operator implements Runnable {
 
                     this.clock.increment();
 
+                    FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Acquiring license for output stream");
                     this.outputLock.acquire();
+                    FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::License for output stream acquired");
                     this.output.writeInt(Command.REPLY_WRITE.ordinal());
                     this.output.writeObject(this.clock);
                     this.output.writeInt(other.getId());
 
                     this.output.flush();
                     this.output.reset();
+                    FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Returning license for output stream");
                     this.outputLock.release();
+                    FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::License for output stream returned");
 
                     if (this.queue.isEmpty()) break;
                 }
             }
         } catch (InterruptedException iex) {
+            FileLogger.writeSimulation(this.clock, "[ERROR]:[Operator#run]::Interrupted Exception Error: " + iex.getMessage());
             System.err.println(iex.getMessage());
+            System.exit(1)
         } catch (ClassNotFoundException cnfex) {
+            FileLogger.writeSimulation(this.clock, "[ERROR]:[Operator#run]::Class not Found: " + cnfex.getMessage());
             System.err.println(cnfex.getMessage());
+            System.exit(1)
         } catch (IOException ioex) {
+            FileLogger.writeSimulation(this.clock, "[ERROR]:[Operator#run]::IO Exception: " + ioex.getMessage());
             System.err.println(ioex.getMessage());
+            System.exit(1)
         }
     }
 

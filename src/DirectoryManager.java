@@ -84,7 +84,7 @@ public class DirectoryManager {
             }
         } catch (IOException iex) {
             System.out.println("[ERROR]:[DirectoryManager#create]::Failure at DirectoryManager");
-            System.exit(1);
+            System.exit(2);
         }
 
         FileLogger.writeBackground("[INFO]:[DirectoryManager#create]::DirectoryManager is good");
@@ -103,7 +103,7 @@ public class DirectoryManager {
             DirectoryManager.wipeFile(file);
         } catch (IOException iex) {
             System.err.println("[ERROR]:[DirectoryManager#createBackgroundLog]::Failed to create background log!");
-            System.exit(1);
+            System.exit(2);
         }
     }
 
@@ -116,7 +116,9 @@ public class DirectoryManager {
             randomAccessFile.setLength(0);
             //Close to prevent memory leaks
             randomAccessFile.close();
-        } catch (IOException iex) {}
+        } catch (IOException iex) {
+            System.exit(2)
+        }
     }
     
     public static void wipeFile(File file) {
@@ -128,6 +130,8 @@ public class DirectoryManager {
             randomAccessFile.setLength(0);
             //Close to prevent memory leaks
             randomAccessFile.close();
-        } catch (IOException iex) {}
+        } catch (IOException iex) {
+            System.exit(2);
+        }
     }
 }

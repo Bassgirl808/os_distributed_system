@@ -86,7 +86,7 @@ public class ShutdownHandler {
                     shutdown.start();
                 } else {
                     FileLogger.writeBackground("[WARN]:[ShutdownHandler#handle]::Force killed application, hard shutdown complete");
-                    System.exit(1);
+                    System.exit(0);
                 }
             }
         });

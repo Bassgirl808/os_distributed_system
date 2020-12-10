@@ -40,47 +40,62 @@ public class ServerThread implements Runnable {
             FileLogger.writeServerThread(this.getId(), "[INFO]:[ServerThread#run]::Sent clock: " + this.getClock() + " ID: " + this.getId());
             
             //Wait until all clients are connected to the server
+            FileLogger.writeServerThread(this.getId(), "[INFO]:[ServerThread#run]::Waiting for serverThreads and clients to all have been launched");
             while (this.serverThreadOutputStreams.size() < Constants.NUMBER_OF_CLIENTS);
 
+            FileLogger.writeServerThread(this.getId(), "[INFO]:[ServerThread#run]::Sending start signal to clients");
             this.output.writeInt(Command.START.ordinal());
             this.output.flush();
+            FileLogger.writeServerThread(this.getId(), "[INFO]:[ServerThread#run]::Sent start signal to clients");
 
             Command command = null;
             ObjectOutputStream output = null;
 
+            FileLogger.writeServerThread(this.getId(), "[INFO]:[ServerThread#run]::Waiting for command");
             while ((command = Command.values()[input.readInt()]) != null && !Thread.currentThread().interrupted()) {
+                FileLogger.writeServerThread(this.getId(), "[INFO]:[ServerThread#run]::Waiting on VectorClock");
                 this.clock = (VectorClock)input.readObject();
+                FileLogger.writeServerThread(this.getId(), "[INFO]:[ServerThread#run]::Vectorclock received");
                 synchronized (this.serverThreadOutputStreams) {
                     switch (command) {
                         case REQUEST_READ:
+                            FileLogger.writeServerThread(this.getId(), "[INFO]:[ServerThread#run]::Recieved read request");
                             output = this.serverThreadOutputStreams.get(1);
                             output.writeInt(Command.REQUEST_READ.ordinal());
                             output.writeObject(this.getClock());
                             output.flush();
                             output.reset();
+                            FileLogger.writeServerThread(this.getId(), "[INFO]:[ServerThread#run]::Processed read request");
                             break;
                         case REPLY_READ:
+                            FileLogger.writeServerThread(this.getId(), "[INFO]:[ServerThread#run]::Received read reply");
                             output = this.serverThreadOutputStreams.get(input.readInt());
                             output.writeInt(Command.REPLY_READ.ordinal());
                             output.writeObject(this.getClock());
                             output.flush();
                             output.reset();
+                            FileLogger.writeServerThread(this.getId(), "[INFO]:[ServerThread#run]::Processed read reply");
                             break;
                         case REQUEST_WRITE:
+                            FileLogger.writeServerThread(this.getId(), "[INFO]:[ServerThread#run]::Received write request");
                             output = this.serverThreadOutputStreams.get(this.getId());
                             output.writeInt(Command.REQUEST_WRITE.ordinal());
                             output.writeObject(this.getClock());
                             output.flush();
                             output.reset();
                             break;
+                            FileLogger.writeServerThread(this.getId(), "[INFO]:[ServerThread#run]::Processed write request");
                         case REPLY_WRITE:
+                            FileLogger.writeServerThread(this.getId(), "[INFO]:[ServerThread#run]::Recieved write reply");
                             output = this.serverThreadOutputStreams.get(input.readInt());
                             output.writeInt(Command.REPLY_WRITE.ordinal());
                             output.writeObject(this.getClock());
                             output.flush();
                             output.reset();
                             break;
+                            FileLogger.writeServerThread(this.getId(), "[INFO]:[ServerThread#run]::Processed write reply");
                     }
+                    FileLogger.writeServerThread(this.getId(), "[INFO]:[ServerThread#run]::Reset and wait for next command");
                     output = null;
                 }
             }
