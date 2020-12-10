@@ -10,6 +10,7 @@ import java.net.Socket;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import java.util.concurrent.Semaphore;
 
 public class Client implements Runnable {
     private String command;
@@ -17,6 +18,8 @@ public class Client implements Runnable {
     private Socket socket;
     private volatile ObjectInputStream input;
     private volatile ObjectOutputStream output;
+    private Semaphore inputLock;
+    private Semaphore outputLock;
     
     public Client() {
         FileLogger.writeBackground("[INFO]:[Client#Client]::Setting up client for PC");
@@ -37,6 +40,9 @@ public class Client implements Runnable {
             FileLogger.writeBackground("[INFO]:[Client#Client]::Receive Vectorclock");
             this.clock = (VectorClock)this.input.readObject();
             FileLogger.writeBackground("[INFO]:[Client#Client]::VectorClock received: " + this.clock);
+
+            this.inputLock = new Semaphore(1);
+            this.outputLock = new Semaphore(1);
         } catch (ClassNotFoundException cnfex) {
             FileLogger.writeBackground("[ERROR]:[Client#Client]::Class Not Found: " + cnfex.getMessage());
             System.err.println(cnfex.getMessage());
@@ -67,13 +73,13 @@ public class Client implements Runnable {
         FileLogger.writeClient(this.getId(), "[INFO]:[Client#run]::Received start command");
 
         FileLogger.writeClient(this.getId(), "[INFO]:[Client#run]::Creating operator to respond to serverthread communications");
-        Operator operator = new Operator(this.clock, this.input, this.output);
+        Operator operator = new Operator(this.clock, this.input, this.output, this.inputLock, this.outputLock);
         Thread operatorThread = new Thread(operator, Constants.THREAD_NAME_OPERATOR);
         ShutdownHandler.Operators.add(operatorThread);
         FileLogger.writeClient(this.getId(), "[INFO]:[Client#run]::Operator created");
         
         FileLogger.writeClient(this.getId(), "[INFO]:[Client#run]::Creating instructor to send instructions to serverthreads for requesting reads and writes");
-        Instructor instructor = new Instructor(this.clock, this.input, this.output, operator);
+        Instructor instructor = new Instructor(this.clock, this.input, this.output, operator, this.inputLock, this.outputLock);
         Thread instructorThread = new Thread(instructor, Constants.THREAD_NAME_INSTRUCTOR);
         ShutdownHandler.Instructors.add(instructorThread);
         FileLogger.writeClient(this.getId(), "[INFO]:[Client#run]::Instructor created");

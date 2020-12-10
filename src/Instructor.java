@@ -7,22 +7,26 @@ import java.io.ObjectOutputStream;
 
 import java.util.Random;
 
-import osdistributedsystem.FileLogger;
-
 import java.util.List;
+
+import java.util.concurrent.Semaphore;
 
 public class Instructor implements Runnable {
     private volatile ObjectInputStream input;
     private volatile ObjectOutputStream output;
     private volatile VectorClock clock;
     private volatile Operator operator;
+    private volatile Semaphore inputLock;
+    private volatile Semaphore outputLock;
     private Distribution<Instruction> distribution;
 
-    public Instructor(VectorClock clock, ObjectInputStream input, ObjectOutputStream output, Operator operator) {
+    public Instructor(VectorClock clock, ObjectInputStream input, ObjectOutputStream output, Operator operator, Semaphore inputLock, Semaphore outputLock) {
         this.clock = clock;
         this.input = input;
         this.output = output;
         this.operator = operator;
+        this.inputLock = inputLock;
+        this.outputLock = outputLock;
         this.distribution = new Distribution<Instruction>(
             List.of(
                 new Pair<Instruction, Double>(Instruction.IDLE, Constants.PERCENT_IDLE),
@@ -44,7 +48,7 @@ public class Instructor implements Runnable {
                 //Sends requests to read and write
                 switch (instruction) {
                     case IDLE:
-                        this.operator.setStatus(Status.IDLE);
+                        //this.operator.setStatus(Status.IDLE);
                         Thread.sleep(1000);
                         break;
                     case READ:
@@ -52,22 +56,28 @@ public class Instructor implements Runnable {
                         this.clock.increment();
                         this.operator.setStatus(Status.READING);
 
+                        this.outputLock.acquire();
                         this.output.writeInt(Command.REQUEST_READ.ordinal());
                         this.output.writeObject(this.clock);
 
                         this.output.flush();
                         this.output.reset();
+                        this.outputLock.release();
                         break;
                     case WRITE:
                         FileLogger.writeSimulation(this.clock, "[INFO]:[Instructor#run]::Requesting to write");
                         this.clock.increment();
                         this.operator.setStatus(Status.WRITING);
                         
+                        FileLogger.writeSimulation(this.clock, "[INFO]:[Instructor#run]::Acquiring access to write");
+                        this.outputLock.acquire();
                         this.output.writeInt(Command.REQUEST_WRITE.ordinal());
                         this.output.writeObject(this.clock);
+                        FileLogger.writeSimulation(this.clock, "[INFO]:[Instructor#run]::Access to write acquired");
 
                         this.output.flush();
                         this.output.reset();
+                        this.outputLock.release();
                         break;
                 }
             }

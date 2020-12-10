@@ -10,16 +10,18 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Collections;
 
 public class Server implements Runnable {
     private ServerSocket server;
 
-    private volatile HashMap<Integer, ObjectOutputStream> serverThreadOutputStreams;
+    private volatile Map<Integer, ObjectOutputStream> serverThreadOutputStreams;
 
     public Server() {
         FileLogger.writeServer("[INFO]:[Server#Server]::Creating server");
         this.server = null;
-        this.serverThreadOutputStreams = new HashMap<Integer, ObjectOutputStream>();
+        this.serverThreadOutputStreams = Collections.synchronizedMap(new HashMap<Integer, ObjectOutputStream>());
         FileLogger.writeServer("[INFO]:[Server#Server]::Server created");
     }
 

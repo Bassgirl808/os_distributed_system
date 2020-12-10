@@ -10,10 +10,10 @@ import java.net.Socket;
 
 import java.util.concurrent.Semaphore;
 
-import java.util.HashMap;
+import java.util.Map;
 
 public class ServerThread implements Runnable {
-    private volatile HashMap<Integer, ObjectOutputStream> serverThreadOutputStreams;
+    private volatile Map<Integer, ObjectOutputStream> serverThreadOutputStreams;
     private Socket socket = null;
 
     private ObjectInputStream input = null;
@@ -21,7 +21,7 @@ public class ServerThread implements Runnable {
 
     private VectorClock clock;
     
-    public ServerThread(int id, HashMap<Integer, ObjectOutputStream> serverThreadOutputStreams, Socket socket, ObjectInputStream input , ObjectOutputStream output) {
+    public ServerThread(int id, Map<Integer, ObjectOutputStream> serverThreadOutputStreams, Socket socket, ObjectInputStream input , ObjectOutputStream output) {
         FileLogger.writeServerThread(id, "[INFO]:[ServerThread#ServerThread]::Creating ServerThread");
         this.serverThreadOutputStreams = serverThreadOutputStreams;
         this.socket = socket;
@@ -50,37 +50,39 @@ public class ServerThread implements Runnable {
 
             while ((command = Command.values()[input.readInt()]) != null && !Thread.currentThread().interrupted()) {
                 this.clock = (VectorClock)input.readObject();
-                switch (command) {
-                    case REQUEST_READ:
-                        output = this.serverThreadOutputStreams.get(1);
-                        output.writeInt(Command.REQUEST_READ.ordinal());
-                        output.writeObject(this.getClock());
-                        output.flush();
-                        //output.reset();
-                        break;
-                    case REPLY_READ:
-                        output = this.serverThreadOutputStreams.get(input.readInt());
-                        output.writeInt(Command.REPLY_READ.ordinal());
-                        output.writeObject(this.getClock());
-                        output.flush();
-                        //output.reset();
-                        break;
-                    case REQUEST_WRITE:
-                        output = this.serverThreadOutputStreams.get(this.getId());
-                        output.writeInt(Command.REQUEST_WRITE.ordinal());
-                        output.writeObject(this.getClock());
-                        output.flush();
-                        //output.reset();
-                        break;
-                    case REPLY_WRITE:
-                        output = this.serverThreadOutputStreams.get(input.readInt());
-                        output.writeInt(Command.REPLY_WRITE.ordinal());
-                        output.writeObject(this.getClock());
-                        output.flush();
-                        //output.reset();
-                        break;
+                synchronized (this.serverThreadOutputStreams) {
+                    switch (command) {
+                        case REQUEST_READ:
+                            output = this.serverThreadOutputStreams.get(1);
+                            output.writeInt(Command.REQUEST_READ.ordinal());
+                            output.writeObject(this.getClock());
+                            output.flush();
+                            output.reset();
+                            break;
+                        case REPLY_READ:
+                            output = this.serverThreadOutputStreams.get(input.readInt());
+                            output.writeInt(Command.REPLY_READ.ordinal());
+                            output.writeObject(this.getClock());
+                            output.flush();
+                            output.reset();
+                            break;
+                        case REQUEST_WRITE:
+                            output = this.serverThreadOutputStreams.get(this.getId());
+                            output.writeInt(Command.REQUEST_WRITE.ordinal());
+                            output.writeObject(this.getClock());
+                            output.flush();
+                            output.reset();
+                            break;
+                        case REPLY_WRITE:
+                            output = this.serverThreadOutputStreams.get(input.readInt());
+                            output.writeInt(Command.REPLY_WRITE.ordinal());
+                            output.writeObject(this.getClock());
+                            output.flush();
+                            output.reset();
+                            break;
+                    }
+                    output = null;
                 }
-                output = null;
             }
             this.socket.close();
             this.input.close();

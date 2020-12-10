@@ -8,8 +8,6 @@ import java.io.ObjectOutputStream;
 
 import java.util.concurrent.Semaphore;
 
-import osdistributedsystem.Constants;
-
 import java.util.Queue;
 import java.util.LinkedList;
 
@@ -18,6 +16,8 @@ public class Operator implements Runnable {
     private volatile VectorClock clock;
     private volatile ObjectInputStream input;
     private volatile ObjectOutputStream output;
+    private volatile Semaphore inputLock;
+    private volatile Semaphore outputLock;
     private volatile Status status;
     private volatile boolean busy;
     private Queue<VectorClock> queue;
@@ -25,10 +25,12 @@ public class Operator implements Runnable {
     private Semaphore writeLock;
     private byte event;
     
-    public Operator(VectorClock clock, ObjectInputStream input, ObjectOutputStream output) {
+    public Operator(VectorClock clock, ObjectInputStream input, ObjectOutputStream output, Semaphore inputLock, Semaphore outputLock) {
         this.clock = clock;
         this.input = input;
         this.output = output;
+        this.inputLock = inputLock;
+        this.outputLock = outputLock;
         this.status = Status.IDLE;
         //PC is busy unless otherwise noted
         this.busy = false;
@@ -45,20 +47,24 @@ public class Operator implements Runnable {
     public void run() {
         try {
             while (!Thread.currentThread().interrupted()) {
+                this.inputLock.acquire();
                 Command command = Command.values()[input.readInt()];
                 VectorClock otherClock = (VectorClock)input.readObject();
+                this.inputLock.release();
                 this.clock.increment();
                 this.clock.merge(otherClock);
 
                 //Handle requests and replies
                 switch (command) {
                     case REQUEST_READ:
+                        this.outputLock.acquire();
                         this.output.writeInt(Command.REPLY_READ.ordinal());
                         this.output.writeObject(this.clock);
                         this.output.writeInt(otherClock.getId());
 
                         this.output.flush();
                         this.output.reset();
+                        this.outputLock.release();
                         break;
                     case REPLY_READ:
                         //Begin critical reading section - parallelism allowed
@@ -106,24 +112,28 @@ public class Operator implements Runnable {
                                 this.clock.increment();
 
                                 FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Writing access granted");
+                                this.outputLock.acquire();
                                 this.output.writeInt(Command.REPLY_WRITE.ordinal());
                                 this.output.writeObject(this.clock);
                                 this.output.writeInt(otherClock.getId());
                                 
                                 this.output.flush();
                                 this.output.reset();
+                                this.outputLock.release();
                             } 
                         } else {
                             FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::No client writing");
                             this.clock.increment();
 
                             FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Writing access granted");
+                            this.outputLock.acquire();
                             this.output.writeInt(Command.REPLY_WRITE.ordinal());
                             this.output.writeObject(this.clock);
                             this.output.writeInt(this.clock.getId());
                             
                             this.output.flush();
                             this.output.reset();
+                            this.outputLock.release();
                         }
                         break;
                     }
@@ -184,12 +194,14 @@ public class Operator implements Runnable {
 
                     this.clock.increment();
 
+                    this.outputLock.acquire();
                     this.output.writeInt(Command.REPLY_WRITE.ordinal());
                     this.output.writeObject(this.clock);
                     this.output.writeInt(other.getId());
 
                     this.output.flush();
                     this.output.reset();
+                    this.outputLock.release();
 
                     if (this.queue.isEmpty()) break;
                 }
