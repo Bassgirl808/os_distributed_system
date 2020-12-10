@@ -16,17 +16,14 @@ public class Instructor implements Runnable {
     private volatile ObjectOutputStream output;
     private volatile VectorClock clock;
     private volatile Operator operator;
-    private volatile Semaphore inputLock;
     private volatile Semaphore outputLock;
     private Distribution<Instruction> distribution;
 
-    public Instructor(VectorClock clock, ObjectInputStream input, ObjectOutputStream output, Operator operator, Semaphore inputLock, Semaphore outputLock) {
+    public Instructor(VectorClock clock, ObjectOutputStream output, Operator operator, Semaphore outputLock) {
         FileLogger.writeSimulation(this.clock, "[INFO]:[Instructor#run]::Building instructor");
         this.clock = clock;
-        this.input = input;
         this.output = output;
         this.operator = operator;
-        this.inputLock = inputLock;
         this.outputLock = outputLock;
         this.distribution = new Distribution<Instruction>(
             List.of(

@@ -50,13 +50,26 @@ public class Operator implements Runnable {
                 FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Acquiring license for input stream");
                 this.inputLock.acquire();
                 FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::License for input stream acquired");
+
+                FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Receiving command");
                 Command command = Command.values()[input.readInt()];
+                FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Received command");
+
+                FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Reciving VectorClocks");
                 VectorClock otherClock = (VectorClock)input.readObject();
+                FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::VectorClocks received");
+                
+                FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Releasing input lock");
                 this.inputLock.release();
+                FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Input lock released");
+
+                FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Updating clocks from request");
                 this.clock.increment();
                 this.clock.merge(otherClock);
+                FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Requested clocks updated");
 
                 //Handle requests and replies
+                FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Handle command");
                 switch (command) {
                     case REQUEST_READ:
                         FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Acquiring license for output stream");
@@ -205,6 +218,7 @@ public class Operator implements Runnable {
                         break;
                     }
                 }
+                FileLogger.writeSimulation(this.clock, "[INFO]:[Operator#run]::Command handled");
 
                 while (!this.busy && this.status == Status.IDLE && !this.queue.isEmpty()) {
                     VectorClock other = this.queue.remove();

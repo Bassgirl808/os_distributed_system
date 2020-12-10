@@ -61,10 +61,6 @@ public class Client implements Runnable {
         FileLogger.writeBackground("[INFO]:[Client#Client]::Client for PC" + this.getId() + " is set up");
     }
 
-    public int getId() {
-        return this.clock.getId();
-    }
-
     public void run() {
         FileLogger.writeClient(this.getId(), "[INFO]:[Client#run]::Starting Client");
 
@@ -86,7 +82,7 @@ public class Client implements Runnable {
         FileLogger.writeClient(this.getId(), "[INFO]:[Client#run]::Operator created");
         
         FileLogger.writeClient(this.getId(), "[INFO]:[Client#run]::Creating instructor to send instructions to serverthreads for requesting reads and writes");
-        Instructor instructor = new Instructor(this.clock, this.input, this.output, operator, this.inputLock, this.outputLock);
+        Instructor instructor = new Instructor(this.clock, this.output, operator, this.outputLock);
         Thread instructorThread = new Thread(instructor, Constants.THREAD_NAME_INSTRUCTOR);
         ShutdownHandler.Instructors.add(instructorThread);
         FileLogger.writeClient(this.getId(), "[INFO]:[Client#run]::Instructor created");
@@ -98,5 +94,9 @@ public class Client implements Runnable {
 
         //Busy wait until joined
         while (!Thread.currentThread().interrupted());
+    }
+
+    public int getId() {
+        return this.clock.getId();
     }
 }
