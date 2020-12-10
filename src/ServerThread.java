@@ -13,7 +13,7 @@ import java.util.concurrent.Semaphore;
 import java.util.HashMap;
 
 public class ServerThread implements Runnable {
-    private HashMap<Integer, ServerThread> serverThreads;
+    private volatile HashMap<Integer, ObjectOutputStream> serverThreadOutputStreams;
     private Socket socket = null;
 
     private ObjectInputStream input = null;
@@ -21,34 +21,30 @@ public class ServerThread implements Runnable {
 
     private VectorClock clock;
     
-    public ServerThread(int id, HashMap<Integer, ServerThread> serverThreads, Socket socket) {
+    public ServerThread(int id, HashMap<Integer, ObjectOutputStream> serverThreadOutputStreams, Socket socket, ObjectInputStream input , ObjectOutputStream output) {
         FileLogger.writeServerThread(id, "[INFO]:[ServerThread#ServerThread]::Creating ServerThread");
-        this.serverThreads = serverThreads;
+        this.serverThreadOutputStreams = serverThreadOutputStreams;
         this.socket = socket;
-        FileLogger.writeServerThread(id, "[INFO]:[ServerThread#ServerThread]::Initialize object streams for " + id);
-        try {
-            this.input = new ObjectInputStream(this.socket.getInputStream());
-            this.output = new ObjectOutputStream(this.socket.getOutputStream());
-        } catch (IOException ioex) {
-            FileLogger.writeServerThread(id, "[ERROR]:[ServerThread#ServerThread]::ServerThread Failure: Could not initialize object streams: " + ioex.getMessage());
-            System.err.println(ioex.getMessage());
-            System.exit(1);
-        }
-        FileLogger.writeServerThread(id, "[INFO]:[ServerThread#ServerThread]::Initialized object streams for " + id);
+        this.input = input;
+        this.output= output;
         this.clock = new VectorClock(id);
         FileLogger.writeServerThread(id, "[INFO]:[ServerThread#ServerThread]::Created ServerThread");
     }
     
     public void run() {
         FileLogger.writeServerThread(this.getId(), "[INFO]:[ServerThread#run]::Starting ServerThread");
-        //Wait until all clients are connected to the server
-        while (this.serverThreads.size() != Constants.NUMBER_OF_CLIENTS);
         try {
             FileLogger.writeServerThread(this.getId(), "[INFO]:[ServerThread#run]::Sending clock to client");
             this.output.writeObject(this.clock);
+            this.output.flush();
             FileLogger.writeServerThread(this.getId(), "[INFO]:[ServerThread#run]::Sent clock: " + this.getClock() + " ID: " + this.getId());
-            //if (this.clock.getId() != this.getId()) throw new Exception("Invalid clock, id mismatch");
             
+            //Wait until all clients are connected to the server
+            while (this.serverThreadOutputStreams.size() < Constants.NUMBER_OF_CLIENTS);
+
+            this.output.writeInt(Command.START.ordinal());
+            this.output.flush();
+
             Command command = null;
             ObjectOutputStream output = null;
 
@@ -56,32 +52,32 @@ public class ServerThread implements Runnable {
                 this.clock = (VectorClock)input.readObject();
                 switch (command) {
                     case REQUEST_READ:
-                        output = this.serverThreads.get(1).getObjectOutputStream();
+                        output = this.serverThreadOutputStreams.get(1);
                         output.writeInt(Command.REQUEST_READ.ordinal());
                         output.writeObject(this.getClock());
                         output.flush();
-                        output.reset();
+                        //output.reset();
                         break;
                     case REPLY_READ:
-                        output = this.serverThreads.get(input.readInt()).getObjectOutputStream();
+                        output = this.serverThreadOutputStreams.get(input.readInt());
                         output.writeInt(Command.REPLY_READ.ordinal());
                         output.writeObject(this.getClock());
                         output.flush();
-                        output.reset();
+                        //output.reset();
                         break;
                     case REQUEST_WRITE:
-                        output = this.serverThreads.get(this.getId()).getObjectOutputStream();
+                        output = this.serverThreadOutputStreams.get(this.getId());
                         output.writeInt(Command.REQUEST_WRITE.ordinal());
                         output.writeObject(this.getClock());
                         output.flush();
-                        output.reset();
+                        //output.reset();
                         break;
                     case REPLY_WRITE:
-                        output = this.serverThreads.get(input.readInt()).getObjectOutputStream();
+                        output = this.serverThreadOutputStreams.get(input.readInt());
                         output.writeInt(Command.REPLY_WRITE.ordinal());
                         output.writeObject(this.getClock());
                         output.flush();
-                        output.reset();
+                        //output.reset();
                         break;
                 }
                 output = null;

@@ -6,12 +6,19 @@ public interface Constants {
     public static final int NUMBER_OF_CLIENTS = 5;
 
     public static final String IPV4 = "127.0.0.1";
-    public static final int PORT = 8020;
+    public static final int PORT = 10000;
     
     //Percentage of actions client should take
-    public static final double PERCENT_IDLE = 0.10;
-    public static final double PERCENT_READ = 0.70;
-    public static final double PERCENT_WRITE = 0.20;
+    public static final double PERCENT_IDLE = 0.02;
+    public static final double PERCENT_READ = 0.85;
+    public static final double PERCENT_WRITE = 0.13;
+
+    //Concurrent IO
+    //Use this to limit how many clients can read at a time
+    public static final int CONCURRENT_IO_READ_MAX = Constants.NUMBER_OF_CLIENTS;
+    //Use this to limit how many clients can write at a time
+    public static final int CONCURRENT_IO_WRITE_MAX = 1;
+    
     
     //Log File Names
     public static final String FILE_LOG_GLOBAL = "global.log";

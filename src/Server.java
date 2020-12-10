@@ -13,15 +13,13 @@ import java.util.HashMap;
 
 public class Server implements Runnable {
     private ServerSocket server;
-    private Socket client;
 
-    private HashMap<Integer, ServerThread> serverThreads;
+    private volatile HashMap<Integer, ObjectOutputStream> serverThreadOutputStreams;
 
     public Server() {
         FileLogger.writeServer("[INFO]:[Server#Server]::Creating server");
         this.server = null;
-        this.client = null;
-        this.serverThreads = new HashMap<Integer, ServerThread>();
+        this.serverThreadOutputStreams = new HashMap<Integer, ObjectOutputStream>();
         FileLogger.writeServer("[INFO]:[Server#Server]::Server created");
     }
 
@@ -34,20 +32,21 @@ public class Server implements Runnable {
             this.server = new ServerSocket(Constants.PORT);
             FileLogger.writeServer("[INFO]:[Server#run]::Server started");
 
-            int id = 0;
-            //Would be nice if we could id++ here instead of elsewhere
-            while (id < Constants.NUMBER_OF_CLIENTS) {
-                this.client = null;
+            for (int id = 0; id < Constants.NUMBER_OF_CLIENTS; id++) {
                 try {
                     FileLogger.writeServer("[INFO]:[Server#run]::Listening for client connection requests");
-                    this.client = this.server.accept();
-                    //Increment id (starts at 0, first client should be 1)
-                    id++;
+                    Socket client = this.server.accept();
                     FileLogger.writeServer("[INFO]:[Server#run]::Accepted connection of PC" + id);
 
+                    FileLogger.writeServer("[INFO]:[Server#run]::Initialize object streams for PC" + id);
+                    ObjectOutputStream output = new ObjectOutputStream(client.getOutputStream());
+                    output.flush();
+                    this.serverThreadOutputStreams.put(id, output);
+                    ObjectInputStream input = new ObjectInputStream(client.getInputStream());
+                    FileLogger.writeServer("[INFO]:[Server#run]::Initialized object streams for PC" + id);
+
                     FileLogger.writeServer("[INFO]:[Server#run]::Creating ServerThread to run client");
-                    ServerThread serverThread = new ServerThread(id, this.serverThreads, this.client);
-                    this.serverThreads.put(id, serverThread);
+                    ServerThread serverThread = new ServerThread(id, this.serverThreadOutputStreams, client, input, output);
                     Thread thread = new Thread(serverThread);
                     ShutdownHandler.ServerThreads.add(thread);
                     FileLogger.writeServer("[INFO]:[Server#run]::ServerThread created");
@@ -55,13 +54,12 @@ public class Server implements Runnable {
                     FileLogger.writeServer("[INFO]:[Server#run]::Start ServerThread");
                     thread.start();
                     FileLogger.writeServer("[INFO]:[Server#run]::ServerThread Started");
-                    
-                    FileLogger.writeServer("[INFO]:[Server#run]::Server resetting for next connection (PC " + id + ")");
-                    //Reset values for next connection (not necessary)
-                    FileLogger.writeServer("[INFO]:[Server#run]::Server reset for next connection (PC " + id + ")");
+
+                    FileLogger.writeServer("[INFO]:[Server#run]::Server resetting for next connection");
                 } catch (IOException ioex) {
                     FileLogger.writeServer("[ERROR]:[Server#run]::Server Failure: " + ioex.getMessage());
                     System.err.println(ioex.getMessage());
+                    System.exit(1);
                 }
             }
 

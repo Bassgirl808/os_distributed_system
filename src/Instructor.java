@@ -7,13 +7,15 @@ import java.io.ObjectOutputStream;
 
 import java.util.Random;
 
+import osdistributedsystem.FileLogger;
+
 import java.util.List;
 
 public class Instructor implements Runnable {
-    private ObjectInputStream input;
-    private ObjectOutputStream output;
+    private volatile ObjectInputStream input;
+    private volatile ObjectOutputStream output;
     private volatile VectorClock clock;
-    private Operator operator;
+    private volatile Operator operator;
     private Distribution<Instruction> distribution;
 
     public Instructor(VectorClock clock, ObjectInputStream input, ObjectOutputStream output, Operator operator) {
@@ -36,13 +38,17 @@ public class Instructor implements Runnable {
             while (!Thread.currentThread().interrupted()) {
                 while (this.operator.isBusy());
                 Thread.sleep(Constants.DELAY_ACTION);
-                Instruction instruction = getInstruction();
+                FileLogger.writeSimulation(this.clock, "[INFO]:[Instructor#run]::Getting instructions");
+                Instruction instruction = this.getInstruction();
 
+                //Sends requests to read and write
                 switch (instruction) {
                     case IDLE:
                         this.operator.setStatus(Status.IDLE);
+                        Thread.sleep(1000);
                         break;
                     case READ:
+                        FileLogger.writeSimulation(this.clock, "[INFO]:[Instructor#run]::Requesting to read");
                         this.clock.increment();
                         this.operator.setStatus(Status.READING);
 
@@ -53,6 +59,7 @@ public class Instructor implements Runnable {
                         this.output.reset();
                         break;
                     case WRITE:
+                        FileLogger.writeSimulation(this.clock, "[INFO]:[Instructor#run]::Requesting to write");
                         this.clock.increment();
                         this.operator.setStatus(Status.WRITING);
                         
@@ -65,10 +72,10 @@ public class Instructor implements Runnable {
                 }
             }
         } catch (InterruptedException iex){
-            FileLogger.writeClient(this.clock.getId(), "[ERROR]:[Instructor#run]::Interrupted Exception: " + iex.getMessage());
+            FileLogger.writeSimulation(this.clock, "[ERROR]:[Instructor#run]::Interrupted Exception: " + iex.getMessage());
             System.err.println(iex.getMessage());
         }catch (IOException ioex){
-            FileLogger.writeClient(this.clock.getId(), "[ERROR]:[Instructor#run]::IO Exception: " + ioex.getMessage());
+            FileLogger.writeSimulation(this.clock, "[ERROR]:[Instructor#run]::IO Exception: " + ioex.getMessage());
             System.err.println(ioex.getMessage());
         }
     }

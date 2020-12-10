@@ -60,7 +60,7 @@ public class FileIO {
 	//Write is used to modify the local write file
 	public static void write(VectorClock clock) throws IOException {
 		//RandomAccessFile is used to write to the local write file
-		RandomAccessFile file = new RandomAccessFile(Constants.DIRECTORY_PC[clock.getId() - 1] + Constants.FILE_TARGET_WRITE, "rw");
+		RandomAccessFile file = new RandomAccessFile(Constants.DIRECTORY_PC[clock.getId()] + Constants.FILE_TARGET_WRITE, "rw");
 		//FileChannel is used for concurrent writing in conjunction with FileLocks
 		FileChannel channel = file.getChannel();
 		//FileLock is used to ensure concurrent write safety

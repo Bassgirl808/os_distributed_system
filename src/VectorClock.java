@@ -42,7 +42,7 @@ public class VectorClock implements Serializable, Comparable<VectorClock> {
 
 	//increment time of this PC by 1
 	public void increment() {
-		this.setTime(this.id - 1, this.getTime(this.id - 1) + 1);
+		this.setTime(this.id, this.getTime(this.id) + 1);
 	}
 
 	//Update timeStamp of this class by comparing to otherVectorClock and merging values
