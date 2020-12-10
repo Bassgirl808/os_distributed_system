@@ -21,6 +21,7 @@ public class Instructor implements Runnable {
     private Distribution<Instruction> distribution;
 
     public Instructor(VectorClock clock, ObjectInputStream input, ObjectOutputStream output, Operator operator, Semaphore inputLock, Semaphore outputLock) {
+        FileLogger.writeSimulation(this.clock, "[INFO]:[Instructor#run]::Building instructor");
         this.clock = clock;
         this.input = input;
         this.output = output;
@@ -34,6 +35,7 @@ public class Instructor implements Runnable {
                 new Pair<Instruction, Double>(Instruction.WRITE, Constants.PERCENT_WRITE)
             )
         );
+        FileLogger.writeSimulation(this.clock, "[INFO]:[Instructor#run]::Instructor built");
     }
 
     public void run() {
@@ -42,42 +44,56 @@ public class Instructor implements Runnable {
             while (!Thread.currentThread().interrupted()) {
                 while (this.operator.isBusy());
                 Thread.sleep(Constants.DELAY_ACTION);
-                FileLogger.writeSimulation(this.clock, "[INFO]:[Instructor#run]::Getting instructions");
+                FileLogger.writeSimulation(this.clock, "[INFO]:[Instructor#run]::Generating instructions");
                 Instruction instruction = this.getInstruction();
+                FileLogger.writeSimulation(this.clock, "[INFO]:[Instructor#run]::Instructions generated");
 
                 //Sends requests to read and write
                 switch (instruction) {
                     case IDLE:
                         //this.operator.setStatus(Status.IDLE);
+                        FileLogger.writeSimulation(this.clock, "[INFO]:[Instructor#run]::Instructor IDLING");
                         Thread.sleep(1000);
+                        FileLogger.writeSimulation(this.clock, "[INFO]:[Instructor#run]::IDLE complete");
                         break;
                     case READ:
                         FileLogger.writeSimulation(this.clock, "[INFO]:[Instructor#run]::Requesting to read");
                         this.clock.increment();
                         this.operator.setStatus(Status.READING);
 
+                        FileLogger.writeSimulation(this.clock, "[INFO]:[Instructor#run]::Acquiring license to read");
                         this.outputLock.acquire();
+                        FileLogger.writeSimulation(this.clock, "[INFO]:[Instructor#run]::License to read acquired");
+                        
                         this.output.writeInt(Command.REQUEST_READ.ordinal());
                         this.output.writeObject(this.clock);
 
                         this.output.flush();
                         this.output.reset();
+                        FileLogger.writeSimulation(this.clock, "[INFO]:[Instructor#run]::Returning license to read");
                         this.outputLock.release();
+                        FileLogger.writeSimulation(this.clock, "[INFO]:[Instructor#run]::License to read returned");
+                        FileLogger.writeSimulation(this.clock, "[INFO]:[Instructor#run]::Requested to read");
                         break;
                     case WRITE:
                         FileLogger.writeSimulation(this.clock, "[INFO]:[Instructor#run]::Requesting to write");
                         this.clock.increment();
                         this.operator.setStatus(Status.WRITING);
                         
-                        FileLogger.writeSimulation(this.clock, "[INFO]:[Instructor#run]::Acquiring access to write");
+                        FileLogger.writeSimulation(this.clock, "[INFO]:[Instructor#run]::Acquiring license to write");
                         this.outputLock.acquire();
+                        FileLogger.writeSimulation(this.clock, "[INFO]:[Instructor#run]::License to write acquired");
+
                         this.output.writeInt(Command.REQUEST_WRITE.ordinal());
                         this.output.writeObject(this.clock);
-                        FileLogger.writeSimulation(this.clock, "[INFO]:[Instructor#run]::Access to write acquired");
+                        
 
                         this.output.flush();
                         this.output.reset();
+                        FileLogger.writeSimulation(this.clock, "[INFO]:[Instructor#run]::Returning license to write");
                         this.outputLock.release();
+                        FileLogger.writeSimulation(this.clock, "[INFO]:[Instructor#run]::License to write returned");
+                        FileLogger.writeSimulation(this.clock, "[INFO]:[Instructor#run]::Requested to write");
                         break;
                 }
             }
