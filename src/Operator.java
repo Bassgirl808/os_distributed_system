@@ -244,15 +244,15 @@ public class Operator implements Runnable {
         } catch (InterruptedException iex) {
             FileLogger.writeSimulation(this.clock, "[ERROR]:[Operator#run]::Interrupted Exception Error: " + iex.getMessage());
             System.err.println(iex.getMessage());
-            System.exit(1)
+            System.exit(1);
         } catch (ClassNotFoundException cnfex) {
             FileLogger.writeSimulation(this.clock, "[ERROR]:[Operator#run]::Class not Found: " + cnfex.getMessage());
             System.err.println(cnfex.getMessage());
-            System.exit(1)
+            System.exit(1);
         } catch (IOException ioex) {
             FileLogger.writeSimulation(this.clock, "[ERROR]:[Operator#run]::IO Exception: " + ioex.getMessage());
             System.err.println(ioex.getMessage());
-            System.exit(1)
+            System.exit(1);
         }
     }
 

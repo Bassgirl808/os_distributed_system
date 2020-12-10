@@ -117,7 +117,7 @@ public class DirectoryManager {
             //Close to prevent memory leaks
             randomAccessFile.close();
         } catch (IOException iex) {
-            System.exit(2)
+            System.exit(2);
         }
     }
     

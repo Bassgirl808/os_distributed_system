@@ -83,8 +83,8 @@ public class ServerThread implements Runnable {
                             output.writeObject(this.getClock());
                             output.flush();
                             output.reset();
-                            break;
                             FileLogger.writeServerThread(this.getId(), "[INFO]:[ServerThread#run]::Processed write request");
+                            break;
                         case REPLY_WRITE:
                             FileLogger.writeServerThread(this.getId(), "[INFO]:[ServerThread#run]::Recieved write reply");
                             output = this.serverThreadOutputStreams.get(input.readInt());
@@ -92,8 +92,8 @@ public class ServerThread implements Runnable {
                             output.writeObject(this.getClock());
                             output.flush();
                             output.reset();
-                            break;
                             FileLogger.writeServerThread(this.getId(), "[INFO]:[ServerThread#run]::Processed write reply");
+                            break;
                     }
                     FileLogger.writeServerThread(this.getId(), "[INFO]:[ServerThread#run]::Reset and wait for next command");
                     output = null;

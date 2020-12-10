@@ -48,15 +48,15 @@ public class Client implements Runnable {
         } catch (ClassNotFoundException cnfex) {
             FileLogger.writeBackground("[ERROR]:[Client#Client]::Class Not Found: " + cnfex.getMessage());
             System.err.println(cnfex.getMessage());
-            System.exit(1)
+            System.exit(1);
         } catch (UnknownHostException uhex) {
             FileLogger.writeBackground("[ERROR]:[Client#Client]::Unknown Host: " + uhex.getMessage());
             System.err.println(uhex.getMessage());
-            System.exit(1)
+            System.exit(1);
         } catch (IOException ioex) {
             FileLogger.writeBackground("[ERROR]:[Client#Client]::Server Failure: " + ioex.getMessage());
             System.err.println(ioex.getMessage());
-            System.exit(1)
+            System.exit(1);
         }
         FileLogger.writeBackground("[INFO]:[Client#Client]::Client for PC" + this.getId() + " is set up");
     }
