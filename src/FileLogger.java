@@ -34,7 +34,7 @@ public class FileLogger {
 			randomAccessFile.seek(randomAccessFile.length());
 
 			//Create message
-			String msg = clock + "\t" + message + "\n";
+			String msg = createTimeStamp() + "\t" + clock + "\t" + message + "\n";
 
 			//Write message to end of file and console
 			randomAccessFile.writeBytes(msg);
@@ -58,7 +58,7 @@ public class FileLogger {
 			randomAccessFile.seek(randomAccessFile.length());
 
 			//Create message
-			String msg = "[ServerThread-" + id + "]\t" + message + "\n";
+			String msg = createTimeStamp() + "\t[ServerThread-" + id + "]\t" + message + "\n";
 
 			//Write message to end of file and console
 			randomAccessFile.writeBytes(msg);
@@ -82,7 +82,7 @@ public class FileLogger {
 			randomAccessFile.seek(randomAccessFile.length());
 
 			//Create message
-			String msg = "[PC" + id + "]\t" + message + "\n";
+			String msg = createTimeStamp() + "\t[PC" + id + "]\t" + message + "\n";
 
 			//Write message to end of file and console
 			randomAccessFile.writeBytes(msg);
